@@ -18,7 +18,7 @@ async def on_ready(ready_event: EventData):
 async def on_message(msg:ChatMessage):
     print(f'in {msg.room.name}, {msg.user.name} said: {msg.text}')
     if msg.text == '1' or '2':
-
+        voteCounter.takeVote(msg.text)
 
 # this will be called whenever the !reply command is issued
 async def test_command(cmd: ChatCommand):
@@ -43,7 +43,21 @@ async def run():
     chat.start()
 
     try:
-        input('Press ENTER to stop!\n')
+        while True:
+            inputSelection = input('Enter 1 to create a vote, 2 to stop the vote, and 3 to shut down the program.\n')
+
+            if inputSelection == '1':
+                voteOptions = voteCounter.createVote()
+                print("Vote has begun with the following options:\n")
+                for option in voteOptions:
+                    print(voteOptions[option].name + "\n")
+
+            if inputSelection == '2':
+                winner = voteCounter.finalizeVote()
+                print(f'{winner} wins!')
+
+            if inputSelection == '3':
+                break
     finally:
         chat.stop()
         await twitch.close()
