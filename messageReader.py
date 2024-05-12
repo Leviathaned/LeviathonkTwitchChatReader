@@ -5,7 +5,6 @@ from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import voteCounter
 import asyncio
 import config
-from timer import Timer
 import CrowdControlWebsiteClicker
 
 APP_ID = config.app_id
