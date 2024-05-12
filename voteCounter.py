@@ -23,7 +23,10 @@ def createVote():
     # but for testing, keep it at 2
     global counts, currentlyVoting, OPTION_COUNT, voteOptions, selectedOptions
 
-    remainingOptions = voteOptions
+    # make my OWN pass-by-value here cause python makes this by reference???
+    remainingOptions = []
+    for value in voteOptions:
+        remainingOptions.append(value)
     selectedOptions = {}
 
     for voteNumber in range(0, OPTION_COUNT):
@@ -48,7 +51,7 @@ def takeVote(vote):
 def finalizeVote():
     global currentlyVoting, counts, selectedOptions
 
-    highestCount = -1
+    highestCount = 0
     currentWinner = -1
 
     for entry in selectedOptions:
@@ -56,7 +59,15 @@ def finalizeVote():
             highestCount = selectedOptions[entry].voteCount
             currentWinner = selectedOptions[entry].name
 
+    finalVoteCount = highestCount
+
+    # TODO: potentially allow for the user to switch between "no votes is no action" or "no votes is random action"
+    if highestCount == 0:
+        currentWinner = random.randint(0, len(selectedOptions) - 1)
+        finalVoteCount = selectedOptions[currentWinner].voteCount
+        currentWinner = selectedOptions[currentWinner].name
+
     currentlyVoting = False
-    return currentWinner
+    return currentWinner, finalVoteCount
 
 
