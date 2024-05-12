@@ -5,7 +5,8 @@ from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import voteCounter
 import asyncio
 import config
-import socketServer
+from timer import Timer
+import CrowdControlWebsiteClicker
 
 APP_ID = config.app_id
 APP_SECRET = config.app_secret
@@ -15,11 +16,11 @@ TARGET_CHANNEL = config.channel_name
 votedUsers = []
 currentlyVoting = False
 
+
 async def on_ready(ready_event: EventData):
     # initialize the twitch instance, this will by default also create a app authentication for you
     await ready_event.chat.join_room(TARGET_CHANNEL)
-    # start up socket server
-    socketServer.start()
+
 
 async def on_message(msg:ChatMessage):
     if (msg.text == '1' or '2') and currentlyVoting and not any(x == msg.user.id for x in votedUsers):
@@ -28,7 +29,7 @@ async def on_message(msg:ChatMessage):
 
 # Start and stop voting made into a seperate function to allow other programs to start the functions directly.
 
-#
+
 async def start_voting(chat):
     global currentlyVoting
     voteOptions = voteCounter.createVote()
@@ -40,14 +41,19 @@ async def start_voting(chat):
     await chat.send_message(TARGET_CHANNEL, preparedMessage)
     currentlyVoting = True
 
+
 async def stop_voting(chat):
     global currentlyVoting
     winner, voteCount = voteCounter.finalizeVote()
     preparedMessage = f"The vote has ended! The winner is {winner} with {voteCount} votes!"
     await chat.send_message(TARGET_CHANNEL, preparedMessage)
     currentlyVoting = False
+    return winner
+
 
 async def run():
+
+    global votedUsers
     twitch = await Twitch(APP_ID, APP_SECRET)
     auth = UserAuthenticator(twitch, USER_SCOPE)
     token, refresh_token = await auth.authenticate()
@@ -60,18 +66,27 @@ async def run():
 
     chat.start()
 
+    await asyncio.sleep(5)
+
     try:
         while True:
-            inputSelection = input('Enter 1 to create a vote, 2 to stop the vote, and 3 to shut down the program.\n')
+            await start_voting(chat)
+            await asyncio.sleep(15)
 
-            if inputSelection == '1':
-                await start_voting(chat)
+            winnerEffect = await stop_voting(chat)
 
-            if inputSelection == '2':
-                await stop_voting(chat)
+            customConf = 0.95
 
-            if inputSelection == '3':
-                break
+            if winnerEffect == "deactivate flute":
+                customConf = 0.7
+            elif winnerEffect == "green potion refill" or "blue potion refill":
+                customConf = 0.97
+
+            CrowdControlWebsiteClicker.clickEffect(winnerEffect, 1, customConf)
+            votedUsers = []
+
+            await asyncio.sleep(30)
+
     finally:
         chat.stop()
         await twitch.close()

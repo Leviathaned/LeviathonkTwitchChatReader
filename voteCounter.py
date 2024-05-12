@@ -2,14 +2,17 @@ import random
 
 counts = []
 currentlyVoting = False
-OPTION_COUNT = 2
+OPTION_COUNT = 4
 
 # This is a temporary set-in - the voteOptions should be decided based on the game
-voteOptions = [
-    "Instant Kill",
-    "Full Health",
-    "Buffer Option"
-]
+voteOptions = ["activate flute", "add arrows", "add bombs", "add rupees", "bee", "blue potion refill", "buff armor",
+              "buff magic", "buff sword", "bug net", "cane of byrna", "cucco attack", "deactivate flute", "debuff armor",
+              "debuff sword", "fairy", "fairy bottle", "gold bee", "green potion refill", "half magic", "heart", "heart container",
+              "heart piece", "ice physics", "infinite arrows", "infinite bombs", "infinite magic", "invert buttons",
+              "invert buttons and d-pad", "invert d-pad", "kill player", "large magic", "one hit ko", "quarter magic",
+              "red potion refill", "remove arrows", "remove bombs", "remove heart container", "remove rupees",
+              "restore health and magic", "silver arrows", "small magic", "swap buttons and d-pad", "upgrade shield",
+              "upgrade sword"]
 
 selectedOptions = {}
 
