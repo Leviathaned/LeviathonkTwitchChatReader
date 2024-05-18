@@ -1,16 +1,16 @@
 import pyautogui
 
-def clickEffect(effectName, effectQuantity, customConfidence):
+def clickEffect(effectName, directory, gamename, effectQuantity, customConfidence, direction):
 
     # Fill deactivatedEffects with the names of the images that have been banned to help the bot flow smoothly!
-    deactivatedEffects = ["bee"]
+    deactivatedEffects = ["ohko.PNG"]
     if deactivatedEffects.__contains__(effectName):
         print("That effect has been deactivated!")
         return
 
     pyautogui.PAUSE = 0.6
 
-    focusLocation = pyautogui.locateOnScreen("WebsiteIcons\\ccicon.png")
+    focusLocation = pyautogui.locateOnScreen("LaptopWebsiteIcons\\ccicon.PNG")
     pyautogui.moveTo(focusLocation)
     currentPos = pyautogui.position()
     pyautogui.moveTo(currentPos.x - 45, None)
@@ -19,11 +19,17 @@ def clickEffect(effectName, effectQuantity, customConfidence):
 
     # the amount of times the program will attempt to find the image before quitting
     # it will scroll down for the first half of attempts, then scroll down for the second half
-    attemptLimit = 10
+    attemptLimit = 40
 
-    finalString = "WebsiteIcons\\ALTTP\\" + effectName + ".PNG"
+    finalString = directory + "\\" + gamename + "\\" + effectName
 
     attemptCount = 0
+    modifier = 1
+
+    if direction == "down":
+        modifier = 1
+    else:
+        modifier = -1
 
     while True:
         try:
@@ -31,12 +37,11 @@ def clickEffect(effectName, effectQuantity, customConfidence):
             break
         except pyautogui.ImageNotFoundException:
             if attemptCount < attemptLimit / 2:
-                pyautogui.scroll(-300)
+                pyautogui.scroll(-400 * modifier)
             else:
-                pyautogui.scroll(300)
+                pyautogui.scroll(400 * modifier)
 
         attemptCount += 1
-        print("Currently on attempt #" + str(attemptCount))
 
         if attemptCount > attemptLimit:
             print("Sorry, the CC bot had an issue finding which effect to activate.")
@@ -46,10 +51,10 @@ def clickEffect(effectName, effectQuantity, customConfidence):
 
     #make sure that the order button isn't cut off at the bottom
     try:
-        orderLocation = pyautogui.locateOnScreen("WebsiteIcons\\Order Button.PNG", confidence=0.9)
+        orderLocation = pyautogui.locateOnScreen(directory + "\\Order Button.PNG", confidence=0.9)
     except pyautogui.ImageNotFoundException:
         pyautogui.scroll(-200)
-        orderLocation = pyautogui.locateOnScreen("WebsiteIcons\\Order Button.PNG", confidence=0.9)
+        orderLocation = pyautogui.locateOnScreen(directory + "\\Order Button.PNG", confidence=0.9)
 
     while effectQuantity > 0:
         pyautogui.click(orderLocation)
@@ -61,4 +66,3 @@ def clickEffect(effectName, effectQuantity, customConfidence):
     pyautogui.click()
 
     pyautogui.moveTo(1, 1)
-

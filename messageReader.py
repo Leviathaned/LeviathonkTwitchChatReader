@@ -1,3 +1,5 @@
+import random
+
 from twitchAPI.twitch import Twitch
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
@@ -5,54 +7,57 @@ from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import voteCounter
 import asyncio
 import config
-from timer import Timer
-import CrowdControlWebsiteClicker
+from CrowdControlWebsiteClicker import clickEffect
 
 APP_ID = config.app_id
 APP_SECRET = config.app_secret
-USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
+USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE_POLLS, AuthScope.CHANNEL_READ_POLLS]
 TARGET_CHANNEL = config.channel_name
 
+VOTE_LENGTH = 60
+TIME_BETWEEN_VOTES = 60
+
 votedUsers = []
-currentlyVoting = False
 
 
 async def on_ready(ready_event: EventData):
     # initialize the twitch instance, this will by default also create a app authentication for you
     await ready_event.chat.join_room(TARGET_CHANNEL)
 
-
-async def on_message(msg:ChatMessage):
-    if (msg.text == '1' or '2') and currentlyVoting and not any(x == msg.user.id for x in votedUsers):
-        voteCounter.takeVote(msg.text)
-        votedUsers.append(msg.user.id)
-
 # Start and stop voting made into a seperate function to allow other programs to start the functions directly.
 
 
-async def start_voting(chat):
-    global currentlyVoting
+async def start_voting(twitch):
     voteOptions = voteCounter.createVote()
-    preparedMessage = "Vote has begun! Type the number of the option you'd like to vote for:\n"
-    counter = 1
+    pollTitle = "WHATS ABOUT TO HAPPEN TO STRIMMERMAN"
+    pollOptions = []
     for option in voteOptions:
-        preparedMessage += str(counter) + ") " + voteOptions[option].name + "\n"
-        counter += 1
-    await chat.send_message(TARGET_CHANNEL, preparedMessage)
-    currentlyVoting = True
+        pollOptions.append(voteOptions[option].name[:-4])
+    response = await Twitch.create_poll(twitch, "1013090214", pollTitle, pollOptions, VOTE_LENGTH)
 
+    # GET THE ID OF THE POLL JUST CREATED
+    print(response.id)
+    return response.id
 
-async def stop_voting(chat):
-    global currentlyVoting
-    winner, voteCount = voteCounter.finalizeVote()
-    preparedMessage = f"The vote has ended! The winner is {winner} with {voteCount} votes!"
-    await chat.send_message(TARGET_CHANNEL, preparedMessage)
-    currentlyVoting = False
-    return winner
+async def stop_voting(twitch, pollId):
+    # USE THE ID OF THE POLL TO GET THE RESULT AND MAKE THINGS HAPPEN
+    generator = Twitch.get_polls(twitch, "1013090214", pollId)
 
+    winningVoteCount = 0
+    currentWinners = []
+
+    # should only be one result but the interable is there because generators
+    async for result in generator:
+        allChoices = result.choices
+        for choice in allChoices:
+            if choice.votes == winningVoteCount:
+                currentWinners.append(choice.title)
+            elif choice.votes > winningVoteCount:
+                currentWinners = [choice.title]
+
+    return currentWinners[random.randint(0, len(currentWinners) - 1)]
 
 async def run():
-
     global votedUsers
     twitch = await Twitch(APP_ID, APP_SECRET)
     auth = UserAuthenticator(twitch, USER_SCOPE)
@@ -62,7 +67,6 @@ async def run():
     chat = await Chat(twitch)
 
     chat.register_event(ChatEvent.READY, on_ready)
-    chat.register_event(ChatEvent.MESSAGE, on_message)
 
     chat.start()
 
@@ -70,22 +74,19 @@ async def run():
 
     try:
         while True:
-            await start_voting(chat)
-            await asyncio.sleep(15)
+            pollId = await start_voting(twitch)
+            await asyncio.sleep(VOTE_LENGTH + 3)
 
-            winnerEffect = await stop_voting(chat)
+            winnerEffect = await stop_voting(twitch, pollId)
+            winnerEffect = winnerEffect + ".PNG"
+            print(winnerEffect)
 
             customConf = 0.95
 
-            if winnerEffect == "deactivate flute":
-                customConf = 0.7
-            elif winnerEffect == "green potion refill" or "blue potion refill":
-                customConf = 0.97
-
-            CrowdControlWebsiteClicker.clickEffect(winnerEffect, 1, customConf)
+            clickEffect(winnerEffect, "LaptopWebsiteIcons", "Peggle", 1, customConf, "down")
             votedUsers = []
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(TIME_BETWEEN_VOTES)
 
     finally:
         chat.stop()
