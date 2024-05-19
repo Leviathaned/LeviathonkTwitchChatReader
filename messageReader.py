@@ -9,6 +9,7 @@ import asyncio
 import config
 from CrowdControlWebsiteClicker import clickEffect
 
+
 APP_ID = config.app_id
 APP_SECRET = config.app_secret
 USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE_POLLS, AuthScope.CHANNEL_READ_POLLS]
