@@ -16,8 +16,8 @@ APP_SECRET = config.app_secret
 USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE_POLLS, AuthScope.CHANNEL_READ_POLLS]
 TARGET_CHANNEL = config.channel_name
 
-VOTE_LENGTH = 15
-TIME_BETWEEN_VOTES = 15
+VOTE_LENGTH = 60
+TIME_BETWEEN_VOTES = 60
 
 votedUsers = []
 
