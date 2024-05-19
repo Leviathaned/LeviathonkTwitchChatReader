@@ -17,7 +17,7 @@ USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE
 TARGET_CHANNEL = config.channel_name
 
 VOTE_LENGTH = 15
-TIME_BETWEEN_VOTES = 60
+TIME_BETWEEN_VOTES = 15
 
 votedUsers = []
 
@@ -40,6 +40,7 @@ async def start_voting(twitch):
         response = await Twitch.create_poll(twitch, "1013090214", pollTitle, pollOptions, VOTE_LENGTH)
     except twitchAPI.type.TwitchAPIException:
         print("Poll failed, skipping this poll")
+        return "Nothing"
 
     # GET THE ID OF THE POLL JUST CREATED
     print(response.id)
@@ -87,6 +88,8 @@ async def run():
             await asyncio.sleep(VOTE_LENGTH + 3)
 
             winnerEffect = await stop_voting(twitch, pollId)
+            if winnerEffect == "Nothing":
+                continue
             winnerEffect = winnerEffect + ".PNG"
             print(winnerEffect)
 
