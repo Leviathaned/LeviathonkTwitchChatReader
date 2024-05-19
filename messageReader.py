@@ -1,5 +1,6 @@
 import random
 
+import twitchAPI.type
 from twitchAPI.twitch import Twitch
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
@@ -34,7 +35,11 @@ async def start_voting(twitch):
     pollOptions = []
     for option in voteOptions:
         pollOptions.append(voteOptions[option].name[:-4])
-    response = await Twitch.create_poll(twitch, "1013090214", pollTitle, pollOptions, VOTE_LENGTH)
+
+    try:
+        response = await Twitch.create_poll(twitch, "1013090214", pollTitle, pollOptions, VOTE_LENGTH)
+    except twitchAPI.type.TwitchAPIException:
+        print("Poll failed, skipping this poll")
 
     # GET THE ID OF THE POLL JUST CREATED
     print(response.id)
@@ -59,6 +64,7 @@ async def stop_voting(twitch, pollId):
                 winningVoteCount = choice.votes
 
     return currentWinners[random.randint(0, len(currentWinners) - 1)]
+
 
 async def run():
     global votedUsers
