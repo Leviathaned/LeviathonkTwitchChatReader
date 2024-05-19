@@ -17,7 +17,7 @@ USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE
 TARGET_CHANNEL = config.channel_name
 
 VOTE_LENGTH = 15
-TIME_BETWEEN_VOTES = 60
+TIME_BETWEEN_VOTES = 15
 
 votedUsers = []
 
