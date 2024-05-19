@@ -40,6 +40,7 @@ async def start_voting(twitch):
         response = await Twitch.create_poll(twitch, "1013090214", pollTitle, pollOptions, VOTE_LENGTH)
     except twitchAPI.type.TwitchAPIException:
         print("Poll failed, skipping this poll")
+        return "Nothing"
 
     # GET THE ID OF THE POLL JUST CREATED
     print(response.id)
@@ -87,6 +88,8 @@ async def run():
             await asyncio.sleep(VOTE_LENGTH + 3)
 
             winnerEffect = await stop_voting(twitch, pollId)
+            if winnerEffect == "Nothing":
+                continue
             winnerEffect = winnerEffect + ".PNG"
             print(winnerEffect)
 
