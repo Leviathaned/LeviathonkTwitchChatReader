@@ -15,7 +15,7 @@ APP_SECRET = config.app_secret
 USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.CHANNEL_MANAGE_POLLS, AuthScope.CHANNEL_READ_POLLS]
 TARGET_CHANNEL = config.channel_name
 
-VOTE_LENGTH = 60
+VOTE_LENGTH = 15
 TIME_BETWEEN_VOTES = 60
 
 votedUsers = []
@@ -51,10 +51,12 @@ async def stop_voting(twitch, pollId):
     async for result in generator:
         allChoices = result.choices
         for choice in allChoices:
+            print("Name: " + choice.title + "\nVotes: " + str(choice.votes))
             if choice.votes == winningVoteCount:
                 currentWinners.append(choice.title)
             elif choice.votes > winningVoteCount:
                 currentWinners = [choice.title]
+                winningVoteCount = choice.votes
 
     return currentWinners[random.randint(0, len(currentWinners) - 1)]
 
